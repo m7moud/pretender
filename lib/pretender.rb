@@ -8,6 +8,7 @@ module Pretender
     true_method = :"true_#{scope}"
     session_key = :"impersonated_#{scope}_id"
     impersonated_var = :"@impersonated_#{scope}"
+    require_login = opts[:require_login] || false
 
     # define methods
     if respond_to?(impersonated_method)
@@ -23,7 +24,7 @@ module Pretender
       if !instance_variable_get(impersonated_var)
         # only fetch impersonation if user is logged in and impersonation_id exists
         true_resource = send(true_method)
-        if session[session_key] and !true_resource
+        if session[session_key] and !true_resource and require_login
           session[session_key] = nil
         end
         value = (session[session_key] && impersonate_with.call(session[session_key])) || true_resource
